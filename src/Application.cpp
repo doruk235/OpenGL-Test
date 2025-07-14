@@ -124,6 +124,11 @@ int main(void) {
         std::cout << "Glfw Init Error" << std::endl;
         return -1;
     }
+
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(1280, 960, "OpenGL Test", NULL, NULL);
@@ -131,6 +136,7 @@ int main(void) {
     if (!window)
     {
         glfwTerminate();
+        std::cout << "GLFW Init Error" << std::endl;
         return -1;
     }
 
@@ -162,23 +168,26 @@ int main(void) {
     };
 
 
-    
+    //Vertex Array
 
+    unsigned int vertexArrayObject;
+    glCall(glGenVertexArrays(1, &vertexArrayObject));
+    glCall(glBindVertexArray(vertexArrayObject));
 
     //Vertex Buffer
     unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * vertexSize * sizeof(float), positions, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, (sizeof(float) * vertexSize), 0);
+    glCall(glGenBuffers(1, &buffer));
+    glCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    glCall(glBufferData(GL_ARRAY_BUFFER, 4 * vertexSize * sizeof(float), positions, GL_STATIC_DRAW));
+    glCall(glEnableVertexAttribArray(0));
+    glCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, (sizeof(float) * vertexSize), 0));
 
 
     //Index Buffer
     unsigned int indexBufferObject;
-    glGenBuffers(1, &indexBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    glCall(glGenBuffers(1, &indexBufferObject));
+    glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject));
+    glCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
     
 
 
@@ -186,7 +195,7 @@ int main(void) {
 
 
     unsigned int shader = createShader(source.VertexSource, source.FragmentSource);
-    glUseProgram(shader);
+    glCall(glUseProgram(shader));
 
 
     double r = 0.4f;
@@ -203,19 +212,31 @@ int main(void) {
     int location = glGetUniformLocation(shader, "u_Color");
     ASSERT(location != -1);
 
+    
 
-
-
+    glCall(glBindVertexArray(0));
+    glCall(glUseProgram(0));
+    glCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+    
+    
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
         
+        
+        glCall(glUseProgram(shader));
+        glCall(glBindVertexArray(vertexArrayObject));
+        glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject));
+        
 
         glUniform4f(location, r, g, b, a);
         glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
          
+
+        //Epilepsy Crisis Mode
         if (incrementing) {
             if (r > 1.0f || r < 0.0f) {
                 rInc = -rInc;
