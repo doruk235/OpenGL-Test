@@ -5,10 +5,32 @@
 #include <string>
 #include <sstream>
 
+
+#define ASSERT(x) if (!(x)) __debugbreak();
+#define glCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+static void GLClearError() {
+
+    while (glGetError() != GL_NO_ERROR);
+
+}
+
+static bool GLLogCall(const char* function, const char* file, const int line) {
+    while (GLenum error = glGetError()) {
+        std::cout << "[OpenGl Error]: " << error << " in file " << file << " in function " << function<< " line "<< line << std::endl;
+        return false;
+    }
+    return true;
+}
+
 struct ShaderProgramSource{
     std::string VertexSource;
     std::string FragmentSource;
 };
+
+
 
 static ShaderProgramSource parseShader(const std::string& filepath) {
     
@@ -115,6 +137,8 @@ int main(void) {
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    glfwSwapInterval(1);
+
     /*Initialize glew*/
     if (glewInit() != GLEW_OK) {
         std::cout << "Glew Init Error" << std::endl;
@@ -164,7 +188,20 @@ int main(void) {
     unsigned int shader = createShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
 
-    
+
+    double r = 0.4f;
+    double g = 0.2f;
+    double b = 0.8f;
+    double a = 1.0f;
+
+    double rInc = 0.005f;
+    double gInc = 0.002f;
+    double bInc = 0.01f;
+    double aInc = 0;
+
+    bool incrementing = true;
+    int location = glGetUniformLocation(shader, "u_Color");
+    ASSERT(location != -1);
 
 
 
@@ -175,8 +212,37 @@ int main(void) {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
         
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
+        glUniform4f(location, r, g, b, a);
+        glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+         
+        if (incrementing) {
+            if (r > 1.0f || r < 0.0f) {
+                rInc = -rInc;
+            }
+
+            r += rInc;
+
+            if (g > 1.0f || g < 0.0f) {
+                gInc = -gInc;
+            }
+
+            g += gInc;
+
+            if (b > 1.0f || b < 0.0f) {
+                bInc = -bInc;
+            }
+
+            b += bInc;
+
+            if (a > 1.0f || a < 0.0f) {
+                aInc = -aInc;
+            }
+
+            a += aInc;
+
+
+        }
 
 
         /* Swap front and back buffers */
