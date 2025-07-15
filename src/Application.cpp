@@ -1,29 +1,16 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 
 
-#define ASSERT(x) if (!(x)) __debugbreak();
-#define glCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
-static void GLClearError() {
-
-    while (glGetError() != GL_NO_ERROR);
-
-}
-
-static bool GLLogCall(const char* function, const char* file, const int line) {
-    while (GLenum error = glGetError()) {
-        std::cout << "[OpenGl Error]: " << error << " in file " << file << " in function " << function<< " line "<< line << std::endl;
-        return false;
-    }
-    return true;
-}
 
 struct ShaderProgramSource{
     std::string VertexSource;
@@ -151,131 +138,131 @@ int main(void) {
         return -1;
     }
 
-    
-    float positions[] = {
-       -0.5f,-0.5f,
-        0.5f,-0.5f,
-        0.5f, 0.5f,
-       -0.5f, 0.5f,
-    };
-
-    const int positionNumber = 2;
-    const int vertexSize = 2;
-
-    unsigned int indices[] = {
-        0,1,2,
-        2,3,0
-    };
-
-
-    //Vertex Array
-
-    unsigned int vertexArrayObject;
-    glCall(glGenVertexArrays(1, &vertexArrayObject));
-    glCall(glBindVertexArray(vertexArrayObject));
-
-    //Vertex Buffer
-    unsigned int buffer;
-    glCall(glGenBuffers(1, &buffer));
-    glCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-    glCall(glBufferData(GL_ARRAY_BUFFER, 4 * vertexSize * sizeof(float), positions, GL_STATIC_DRAW));
-    glCall(glEnableVertexAttribArray(0));
-    glCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, (sizeof(float) * vertexSize), 0));
-
-
-    //Index Buffer
-    unsigned int indexBufferObject;
-    glCall(glGenBuffers(1, &indexBufferObject));
-    glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject));
-    glCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
-    
-
-
-    ShaderProgramSource source = parseShader("res/Shaders/basic.shader");
-
-
-    unsigned int shader = createShader(source.VertexSource, source.FragmentSource);
-    glCall(glUseProgram(shader));
-
-
-    double r = 0.4f;
-    double g = 0.2f;
-    double b = 0.8f;
-    double a = 1.0f;
-
-    double rInc = 0.005f;
-    double gInc = 0.002f;
-    double bInc = 0.01f;
-    double aInc = 0;
-
-    bool incrementing = true;
-    int location = glGetUniformLocation(shader, "u_Color");
-    ASSERT(location != -1);
-
-    
-
-    glCall(glBindVertexArray(0));
-    glCall(glUseProgram(0));
-    glCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-    
-    
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-        
-        
-        glCall(glUseProgram(shader));
+        float positions[] = {
+           -0.5f,-0.5f,
+            0.5f,-0.5f,
+            0.5f, 0.5f,
+           -0.5f, 0.5f,
+        };
+
+        const int positionNumber = 2;
+        const int vertexSize = 2;
+
+        unsigned int indices[] = {
+            0,1,2,
+            2,3,0
+        };
+
+
+        //Vertex Array
+
+        unsigned int vertexArrayObject;
+        glCall(glGenVertexArrays(1, &vertexArrayObject));
         glCall(glBindVertexArray(vertexArrayObject));
-        glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject));
-        
 
-        glUniform4f(location, r, g, b, a);
-        glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-         
 
-        //Epilepsy Crisis Mode
-        if (incrementing) {
-            if (r > 1.0f || r < 0.0f) {
-                rInc = -rInc;
+
+
+        VertexBuffer vertextBuffer(positions, 4 * vertexSize * sizeof(float));
+
+
+        glCall(glEnableVertexAttribArray(0));
+        glCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, (sizeof(float) * vertexSize), 0));
+
+
+
+        IndexBuffer indexBuffer(indices, 6);
+
+
+
+
+        ShaderProgramSource source = parseShader("res/Shaders/basic.shader");
+
+
+        unsigned int shader = createShader(source.VertexSource, source.FragmentSource);
+        glCall(glUseProgram(shader));
+
+
+        double r = 0.4f;
+        double g = 0.2f;
+        double b = 0.8f;
+        double a = 1.0f;
+
+        double rInc = 0.005f;
+        double gInc = 0.002f;
+        double bInc = 0.01f;
+        double aInc = 0;
+
+        bool incrementing = true;
+        int location = glGetUniformLocation(shader, "u_Color");
+        ASSERT(location != -1);
+
+
+
+        glCall(glBindVertexArray(0));
+        glCall(glUseProgram(0));
+        glCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+
+        /* Loop until the user closes the window */
+        while (!glfwWindowShouldClose(window))
+        {
+            /* Render here */
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glCall(glUseProgram(shader));
+            glUniform4f(location, r, g, b, a);
+
+            glCall(glBindVertexArray(vertexArrayObject));
+            glCall(indexBuffer.Bind())
+
+
+
+                glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+
+            //Epilepsy Crisis Mode
+            if (incrementing) {
+                if (r > 1.0f || r < 0.0f) {
+                    rInc = -rInc;
+                }
+
+                r += rInc;
+
+                if (g > 1.0f || g < 0.0f) {
+                    gInc = -gInc;
+                }
+
+                g += gInc;
+
+                if (b > 1.0f || b < 0.0f) {
+                    bInc = -bInc;
+                }
+
+                b += bInc;
+
+                if (a > 1.0f || a < 0.0f) {
+                    aInc = -aInc;
+                }
+
+                a += aInc;
+
+
             }
 
-            r += rInc;
 
-            if (g > 1.0f || g < 0.0f) {
-                gInc = -gInc;
-            }
+            /* Swap front and back buffers */
+            glfwSwapBuffers(window);
 
-            g += gInc;
-
-            if (b > 1.0f || b < 0.0f) {
-                bInc = -bInc;
-            }
-
-            b += bInc;
-
-            if (a > 1.0f || a < 0.0f) {
-                aInc = -aInc;
-            }
-
-            a += aInc;
-
-
+            /* Poll for and process events */
+            glfwPollEvents();
         }
 
 
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
+        //glDeleteProgram(shader);
     }
-
-
-    //glDeleteProgram(shader);
-
 
     glfwTerminate();
     return 0;
