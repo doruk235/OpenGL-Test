@@ -10,6 +10,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 
 struct ShaderProgramSource{
@@ -146,36 +147,30 @@ int main(void) {
            -0.5f, 0.5f,
         };
 
-        const int positionNumber = 2;
-        const int vertexSize = 2;
-
         unsigned int indices[] = {
             0,1,2,
             2,3,0
         };
 
 
-        //Vertex Array
-
-        unsigned int vertexArrayObject;
-        glCall(glGenVertexArrays(1, &vertexArrayObject));
-        glCall(glBindVertexArray(vertexArrayObject));
-
+        glCall(glBindVertexArray(0));
+        glCall(glUseProgram(0));
+        glCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
 
 
-        VertexBuffer vertextBuffer(positions, 4 * vertexSize * sizeof(float));
+        VertexArray vertexArray;
 
+        VertexBuffer vertexBuffer(positions, 4 * 2 * sizeof(float));
 
-        glCall(glEnableVertexAttribArray(0));
-        glCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, (sizeof(float) * vertexSize), 0));
+        VertexBufferLayout layout;
 
+        layout.Push<float>(2);
 
+        vertexArray.AddBuffer(vertexBuffer, layout);
 
         IndexBuffer indexBuffer(indices, 6);
-
-
-
 
         ShaderProgramSource source = parseShader("res/Shaders/basic.shader");
 
@@ -198,14 +193,6 @@ int main(void) {
         int location = glGetUniformLocation(shader, "u_Color");
         ASSERT(location != -1);
 
-
-
-        glCall(glBindVertexArray(0));
-        glCall(glUseProgram(0));
-        glCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-        glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-
-
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
@@ -215,12 +202,8 @@ int main(void) {
             glCall(glUseProgram(shader));
             glUniform4f(location, r, g, b, a);
 
-            glCall(glBindVertexArray(vertexArrayObject));
-            glCall(indexBuffer.Bind())
-
-
-
-                glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+            glCall(indexBuffer.Bind());
+            glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
 
             //Epilepsy Crisis Mode
