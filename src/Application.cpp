@@ -10,7 +10,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
-
+#include "glUtilities.h"
 
 int main(void) {
 
@@ -95,8 +95,9 @@ int main(void) {
         bool incrementing = true;
 
         Shader shader("res/Shaders/basic.shader");
+        Renderer renderer;
 
-        shader.Bind();
+        renderer.Draw(vertexArray, indexBuffer, shader);
         shader.SetUniforms4f("u_Color", r, g, b, a);
 
 
@@ -105,20 +106,15 @@ int main(void) {
         vertexBuffer.UnBind();
         indexBuffer.UnBind();
 
+
+
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
-            /* Render here */
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            shader.Bind();
+            renderer.Clear();
+            renderer.Draw(vertexArray, indexBuffer, shader);
             shader.SetUniforms4f("u_Color", r, g, b, a);
-
-            vertexArray.Bind();
-            indexBuffer.Bind();
-
-            glCall(indexBuffer.Bind());
-            glCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
 
             //Epilepsy Crisis Mode
