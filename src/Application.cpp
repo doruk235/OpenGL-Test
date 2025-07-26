@@ -11,6 +11,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "glUtilities.h"
+#include "Texture.h"
 
 int main(void) {
 
@@ -50,10 +51,10 @@ int main(void) {
 
     {
         float positions[] = {
-           -0.5f,-0.5f,
-            0.5f,-0.5f,
-            0.5f, 0.5f,
-           -0.5f, 0.5f,
+           -0.5f,-0.5f, 0.0f, 0.0f,
+            0.5f,-0.5f, 1.0f, 0.0f,
+            0.5f, 0.5f, 1.0f, 1.0f,
+           -0.5f, 0.5f, 0.0f, 1.0f,
         };
 
         unsigned int indices[] = {
@@ -61,6 +62,9 @@ int main(void) {
             2,3,0
         };
 
+
+        glCall(glEnable(GL_BLEND));
+        glCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         glCall(glBindVertexArray(0));
         glCall(glUseProgram(0));
@@ -71,28 +75,33 @@ int main(void) {
 
         VertexArray vertexArray;
 
-        VertexBuffer vertexBuffer(positions, 4 * 2 * sizeof(float));
+        VertexBuffer vertexBuffer(positions, 4 * 4 * sizeof(float));
 
         VertexBufferLayout layout;
 
+        layout.Push<float>(2);
         layout.Push<float>(2);
 
         vertexArray.AddBuffer(vertexBuffer, layout);
 
         IndexBuffer indexBuffer(indices, 6);
-        
+       
 
         double r = 0.4f;
         double g = 0.2f;
         double b = 0.8f;
-        double a = 1.0f;
+        double a = 0.1f;
 
         double rInc = 0.005f;
         double gInc = 0.002f;
         double bInc = 0.01f;
         double aInc = 0;
 
-        bool incrementing = true;
+        bool incrementing = false;
+
+        Texture texture("Res/Textures/99.png");
+        short textureSlot = 0;
+        texture.Bind(textureSlot);
 
         Shader shader("res/Shaders/basic.shader");
         Renderer renderer;
@@ -100,6 +109,7 @@ int main(void) {
         renderer.Draw(vertexArray, indexBuffer, shader);
         shader.SetUniforms4f("u_Color", r, g, b, a);
 
+        shader.SetUniforms1i("u_Texture", textureSlot);
 
         vertexArray.UnBind();
         shader.UnBind();
