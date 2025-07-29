@@ -1,5 +1,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -12,6 +16,9 @@
 #include "Shader.h"
 #include "glUtilities.h"
 #include "Texture.h"
+
+
+
 
 int main(void) {
 
@@ -28,8 +35,10 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         
+    int projectRes[] = {1920,1080};
+
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(1280, 960, "OpenGL Test", NULL, NULL);
+    window = glfwCreateWindow(projectRes[0], projectRes[1], "OpenGL Test", nullptr, NULL);
 
     if (!window)
     {
@@ -51,10 +60,10 @@ int main(void) {
 
     {
         float positions[] = {
-           -0.5f,-0.5f, 0.0f, 0.0f,
-            0.5f,-0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, 1.0f, 1.0f,
-           -0.5f, 0.5f, 0.0f, 1.0f,
+            500.0f, 500.0f, 0.0f, 0.0f,
+            1000.0f, 500.0f, 1.0f, 0.0f,
+            1000.0f, 1000.0f, 1.0f, 1.0f,
+            500.0f, 1000.0f, 0.0f, 1.0f,
         };
 
         unsigned int indices[] = {
@@ -87,17 +96,23 @@ int main(void) {
         IndexBuffer indexBuffer(indices, 6);
        
 
+        glm::mat4 proj = glm::ortho(0.0f, (float) projectRes[0], 0.0f, (float)projectRes[1], -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(100, 0, 0));
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(100, -200, 0));
+
+        glm::mat4 mvp = proj * view * model;
+
         double r = 0.4f;
         double g = 0.2f;
         double b = 0.8f;
-        double a = 0.1f;
+        double a = 0.0f;
 
         double rInc = 0.005f;
         double gInc = 0.002f;
         double bInc = 0.01f;
         double aInc = 0;
 
-        bool incrementing = false;
+        bool incrementing = true;
 
         Texture texture("Res/Textures/99.png");
         short textureSlot = 0;
@@ -108,6 +123,8 @@ int main(void) {
 
         renderer.Draw(vertexArray, indexBuffer, shader);
         shader.SetUniforms4f("u_Color", r, g, b, a);
+        shader.SetUniforms4m("u_MVP", mvp);
+
 
         shader.SetUniforms1i("u_Texture", textureSlot);
 
