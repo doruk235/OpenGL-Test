@@ -8,6 +8,9 @@
 #include <string>
 #include <sstream>
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 #include "Renderer.h"
 #include "VertexBuffer.h"
@@ -16,6 +19,7 @@
 #include "Shader.h"
 #include "glUtilities.h"
 #include "Texture.h"
+
 
 
 
@@ -98,9 +102,6 @@ int main(void) {
 
         glm::mat4 proj = glm::ortho(0.0f, (float) projectRes[0], 0.0f, (float)projectRes[1], -1.0f, 1.0f);
         glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(100, 0, 0));
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(100, -200, 0));
-
-        glm::mat4 mvp = proj * view * model;
 
         double r = 0.4f;
         double g = 0.2f;
@@ -120,10 +121,20 @@ int main(void) {
 
         Shader shader("res/Shaders/basic.shader");
         Renderer renderer;
+        
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui::StyleColorsDark();
+        ImGui_ImplOpenGL3_Init((char*)glGetString(460));
+
+        glm::vec3 translation(100, -200, 0);
+        
+
 
         renderer.Draw(vertexArray, indexBuffer, shader);
         shader.SetUniforms4f("u_Color", r, g, b, a);
-        shader.SetUniforms4m("u_MVP", mvp);
+
 
 
         shader.SetUniforms1i("u_Texture", textureSlot);
@@ -136,12 +147,23 @@ int main(void) {
 
 
 
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
             renderer.Clear();
             renderer.Draw(vertexArray, indexBuffer, shader);
+
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+            glm::mat4 mvp = proj * view * model;
             shader.SetUniforms4f("u_Color", r, g, b, a);
+            shader.SetUniforms4m("u_MVP", mvp);
+
 
 
             //Epilepsy Crisis Mode
@@ -173,6 +195,28 @@ int main(void) {
 
             }
 
+            static float f = 0.0f;
+            static int counter = 0;
+
+            // Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+            {
+                static float f = 0.0f;
+                static int counter = 0;
+
+                ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+                ImGui::SliderFloat3("Translation", &translation.x, -1000.0f, 1000.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                ImGui::End();
+            }
+           
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+
+
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
@@ -181,6 +225,10 @@ int main(void) {
             glfwPollEvents();
         }
     }
+    
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
