@@ -60,6 +60,9 @@
     <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\test\TestClearColor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Res\Shaders\basic.shader" />
@@ -477,6 +480,12 @@
     <None Include="src\vendor\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="Dependencies\GLEW\bin\Release\Win32\glew32.dll" />
+    <None Include="Dependencies\GLEW\bin\Release\Win32\glewinfo.exe" />
+    <None Include="Dependencies\GLEW\bin\Release\Win32\visualinfo.exe" />
+    <None Include="Dependencies\GLEW\bin\Release\x64\glew32.dll" />
+    <None Include="Dependencies\GLEW\bin\Release\x64\glewinfo.exe" />
+    <None Include="Dependencies\GLEW\bin\Release\x64\visualinfo.exe" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">
@@ -1409,6 +1418,12 @@
     <ClInclude Include="Dependencies\GLFW\include\GLFW\glfw3native.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\test\test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\test\TestClearColor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Res\Textures\99.png">
@@ -1417,5 +1432,13 @@
     <Image Include="Res\Textures\OrangeLogo.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Dependencies\GLEW\lib\Release\Win32\glew32s.lib" />
+    <Library Include="Dependencies\GLEW\lib\Release\Win32\glew32.lib" />
+    <Library Include="Dependencies\GLEW\lib\Release\x64\glew32.lib" />
+    <Library Include="Dependencies\GLEW\lib\Release\x64\glew32s.lib" />
+    <Library Include="Dependencies\GLFW\lib-vc2022\glfw3.lib" />
+    <Library Include="Dependencies\GLFW\lib-vc2022\glfw3_mt.lib" />
   </ItemGroup>
 </Project>

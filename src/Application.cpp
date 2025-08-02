@@ -20,6 +20,7 @@
 #include "glUtilities.h"
 #include "Texture.h"
 
+#include "test/TestClearColor.h"
 
 
 
@@ -50,8 +51,7 @@ int main(void) {
         std::cout << "GLFW Init Error" << std::endl;
         return -1;
     }
-
-    /* Make the window's context current */
+    
     glfwMakeContextCurrent(window);
 
     glfwSwapInterval(1);
@@ -62,150 +62,36 @@ int main(void) {
         return -1;
     }
 
-    {
-        float positions[] = {
-            500.0f, 500.0f, 0.0f, 0.0f,
-            1000.0f, 500.0f, 1.0f, 0.0f,
-            1000.0f, 1000.0f, 1.0f, 1.0f,
-            500.0f, 1000.0f, 0.0f, 1.0f,
-        };
+    glCall(glEnable(GL_BLEND));
+    glCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        unsigned int indices[] = {
-            0,1,2,
-            2,3,0
-        };
-
-
-        glCall(glEnable(GL_BLEND));
-        glCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
-        glCall(glBindVertexArray(0));
-        glCall(glUseProgram(0));
-        glCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-        glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-
-
-
-        VertexArray vertexArray;
-
-        VertexBuffer vertexBuffer(positions, 4 * 4 * sizeof(float));
-
-        VertexBufferLayout layout;
-
-        layout.Push<float>(2);
-        layout.Push<float>(2);
-
-        vertexArray.AddBuffer(vertexBuffer, layout);
-
-        IndexBuffer indexBuffer(indices, 6);
-       
-
-        glm::mat4 proj = glm::ortho(0.0f, (float) projectRes[0], 0.0f, (float)projectRes[1], -1.0f, 1.0f);
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(100, 0, 0));
-
-        double r = 0.4f;
-        double g = 0.2f;
-        double b = 0.8f;
-        double a = 0.0f;
-
-        double rInc = 0.005f;
-        double gInc = 0.002f;
-        double bInc = 0.01f;
-        double aInc = 0;
-
-        bool incrementing = true;
-
-        Texture texture("Res/Textures/99.png");
-        short textureSlot = 0;
-        texture.Bind(textureSlot);
-
-        Shader shader("res/Shaders/basic.shader");
-        Renderer renderer;
+    Renderer renderer;
         
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui::StyleColorsDark();
-        ImGui_ImplOpenGL3_Init((char*)glGetString(460));
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui::StyleColorsDark();
+    ImGui_ImplOpenGL3_Init((char*)glGetString(460));
 
-        glm::vec3 translation(100, -200, 0);
-        
-
-
-        renderer.Draw(vertexArray, indexBuffer, shader);
-        shader.SetUniforms4f("u_Color", r, g, b, a);
-
-
-
-        shader.SetUniforms1i("u_Texture", textureSlot);
-
-        vertexArray.UnBind();
-        shader.UnBind();
-        vertexBuffer.UnBind();
-        indexBuffer.UnBind();
-
-
-
-
+    test::TestClearColor test;
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
             renderer.Clear();
-            renderer.Draw(vertexArray, indexBuffer, shader);
+
+            test.OnUpdate(0.0f);
+            test.OnRender();
+
 
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
+            test.OnImGuiRender();
 
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
-            glm::mat4 mvp = proj * view * model;
-            shader.SetUniforms4f("u_Color", r, g, b, a);
-            shader.SetUniforms4m("u_MVP", mvp);
-
-
-
-            //Epilepsy Crisis Mode
-            if (incrementing) {
-                if (r > 1.0f || r < 0.0f) {
-                    rInc = -rInc;
-                }
-
-                r += rInc;
-
-                if (g > 1.0f || g < 0.0f) {
-                    gInc = -gInc;
-                }
-
-                g += gInc;
-
-                if (b > 1.0f || b < 0.0f) {
-                    bInc = -bInc;
-                }
-
-                b += bInc;
-
-                if (a > 1.0f || a < 0.0f) {
-                    aInc = -aInc;
-                }
-
-                a += aInc;
-
-
-            }
-
-            static float f = 0.0f;
-            static int counter = 0;
-
-            // Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
             {
-                static float f = 0.0f;
-                static int counter = 0;
-
-                ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-                ImGui::SliderFloat3("Translation", &translation.x, -1000.0f, 1000.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                ImGui::Begin("Control Panel");
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
@@ -215,15 +101,8 @@ int main(void) {
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 
-
-
-
-            /* Swap front and back buffers */
             glfwSwapBuffers(window);
-
-            /* Poll for and process events */
             glfwPollEvents();
-        }
     }
     
     ImGui_ImplOpenGL3_Shutdown();
