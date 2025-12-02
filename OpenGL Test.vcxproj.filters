@@ -66,6 +66,12 @@
     <ClCompile Include="src\test\test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\test\TestTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GlobalProgramUtilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Res\Shaders\basic.shader" />
@@ -1425,6 +1431,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\test\TestClearColor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\test\TestTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GlobalProgramUtilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

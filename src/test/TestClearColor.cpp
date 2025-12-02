@@ -9,8 +9,6 @@ namespace test {
 	test::TestClearColor::TestClearColor() 
 		:m_ClearColor { 0.2f, 0.3f, 0.8f, 1.0f }
 	{
-
-
 	}
 
 	test::TestClearColor::~TestClearColor()
@@ -31,6 +29,5 @@ namespace test {
 	{
 		ImGui::ColorEdit4("Clear Color", m_ClearColor);
 	}
-
 }
 

@@ -12,9 +12,7 @@ Shader::Shader(const std::string& filepath)
 {
     glCall(ShaderProgramSource source = ParseShader(filepath));
     glCall(m_RendererID = CreateShader(source.VertexSource, source.FragmentSource));
-
 }
-
 
 void Shader::Bind() const{
     glCall(glUseProgram(m_RendererID));
@@ -31,7 +29,6 @@ Shader::~Shader()
 void Shader::SetUniforms4f(const std::string& name, float v0, float v1, float v2, float v3)
 {
     int location = GetUniformLocation(name);
-    //std::cout << "name: " << name << " location " << location << " r:" << v0 << " g:" << v1 << " b:" << v2 << " a:" << v3 << std::endl;
     glCall(glUniform4f(location, v0, v1, v2, v3));
 }
 
@@ -44,7 +41,6 @@ void Shader::SetUniforms1f(const std::string& name, float value)
 void Shader::SetUniforms1i(const std::string& name, int value)
 {
     int location = GetUniformLocation(name);
-    //std::cout << "name: " << name << " location " << location << " value" << value << std::endl;
     glCall(glUniform1i(location, value));
 }
 
@@ -70,12 +66,10 @@ int Shader::GetUniformLocation(const std::string& name)
 
 unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 {
-
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
     glShaderSource(id, 1, &src, nullptr);
     glCompileShader(id);
-
 
     int result;
     glGetShaderiv(id, GL_COMPILE_STATUS, &result);
@@ -89,14 +83,11 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
         glDeleteShader(id);
         return 5;
     }
-
     return id;
-
 }
 
 ShaderProgramSource Shader::ParseShader(const std::string& filepath)
 {
-
     std::ifstream stream(filepath);
 
     enum class ShaderType {
@@ -107,35 +98,26 @@ ShaderProgramSource Shader::ParseShader(const std::string& filepath)
     std::stringstream sStream[2];
     ShaderType type = ShaderType::NONE;
 
-
     while (getline(stream, line)) {
 
         if (line.find("#shader") != std::string::npos) {
-
             if (line.find("vertex") != std::string::npos) {
                 type = ShaderType::VERTEX;
-
             }
             else if (line.find("fragment") != std::string::npos) {
                 type = ShaderType::FRAGMENT;
-
             }
             else {
                 type = ShaderType::NONE;
             }
-
         }
-        else {
 
+        else {
             sStream[(int)type] << line << '\n';
         }
-
     }
     return{ sStream[0].str(),sStream[1].str() };
-
-
 }
-
 
 int Shader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
 

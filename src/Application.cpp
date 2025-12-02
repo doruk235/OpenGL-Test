@@ -19,10 +19,11 @@
 #include "Shader.h"
 #include "glUtilities.h"
 #include "Texture.h"
+#include "GlobalProgramUtilities.h"
 
 #include "test/test.h"
 #include "test/TestClearColor.h"
-
+#include "test/TestTexture.h"
 
 
 
@@ -36,15 +37,14 @@ int main(void) {
         return -1;
     }
 
-
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         
-    int projectRes[] = {1920,1080};
+
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(projectRes[0], projectRes[1], "OpenGL Test", nullptr, NULL);
+    window = glfwCreateWindow(getProjectRes(0), getProjectRes(1), "OpenGL Test", nullptr, NULL);
 
     if (!window)
     {
@@ -78,8 +78,9 @@ int main(void) {
     test::TestMenu* testMenu = new test::TestMenu(currentTest);
     currentTest = testMenu;
 
-
     testMenu->RegisterTest<test::TestClearColor>("Clear Color");
+    testMenu->RegisterTest<test::TestTexture>("Texture");
+
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))

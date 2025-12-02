@@ -2,12 +2,8 @@
 #include<gl/glew.h>
 #include<iostream>
 
-
-
 void GLClearError() {
-
     while (glGetError() != GL_NO_ERROR);
-
 }
 
 bool GLLogCall(const char* function, const char* file, const int line) {
